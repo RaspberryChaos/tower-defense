@@ -93,7 +93,7 @@ class Defender {
         ctx.fillStyle = "blue";
         ctx.fillRect(this.x, this.y, this.width, this.height);
         ctx.fillStyle = "gold";
-        ctx.font = "30px Arial";
+        ctx.font = "30px Orbitron";
         ctx.fillText(Math.floor(this.health), this.x +15, this.y +30);
     }
 }
@@ -139,7 +139,7 @@ class Enemy {
         ctx.fillStyle = "red";
         ctx.fillRect(this.x, this.y, this.width, this.height);
         ctx.fillStyle = "black";
-        ctx.font = "30px Arial";
+        ctx.font = "30px Orbitron";
         ctx.fillText(Math.floor(this.health), this.x +15, this.y +30);
     }
 }
@@ -167,8 +167,14 @@ function handleEnemies() {
 
 function handleGameStatus() {
     ctx.fillStyle = "gold";
-    ctx.font = "30px Arial";
+    ctx.font = "30px Orbitron";
     ctx.fillText(`Resources: ${numberOfResources}`, 20, 55);
+
+    if(gameOver) {
+        ctx.fillStyle = "black";
+        ctx.font = "90px Orbitron";
+        ctx.fillText("GAME OVER!", 135, 330);
+    }
 }
 
 function animate() {
@@ -180,9 +186,7 @@ function animate() {
     handleEnemies();
     handleGameStatus();
     frame++;
-    if(!gameOver) {
-        requestAnimationFrame(animate);
-    }
+    if(!gameOver) requestAnimationFrame(animate);
 };
 
 animate();
