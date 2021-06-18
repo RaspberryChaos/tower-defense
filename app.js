@@ -12,12 +12,14 @@ let enemiesInterval = 600;
 let frame = 0;
 let gameOver = false;
 let score = 0;
+const winningScore = 50;
 
 const gameGrid = [];
 const defenders = [];
 const enemies = [];
 const enemyPositions = [];
 const projectiles = [];
+const resources = [];
 
 //mouse
 const mouse = {
@@ -197,8 +199,8 @@ class Enemy {
     constructor(verticalPosition) {
         this.x = canvas.width;
         this.y = verticalPosition;
-        this.width = cellSize;
-        this.height = cellSize;
+        this.width = cellSize - cellGap*2;
+        this.height = cellSize - cellGap*2;
         this.speed = Math.random() * 0.2 + 0.4;
         this.movement = this.speed;
         this.health = 100;
@@ -236,8 +238,8 @@ function handleEnemies() {
         }
     }
 
-    if(frame % enemiesInterval === 0) {
-        let verticalPosition = Math.floor(Math.random() * 5 + 1) * cellSize;
+    if(frame % enemiesInterval === 0 && score < winningScore) {
+        let verticalPosition = Math.floor(Math.random() * 5 + 1) * cellSize + cellGap;
         console.log(verticalPosition);
         enemies.push(new Enemy(verticalPosition));
         enemyPositions.push(verticalPosition); 
@@ -247,6 +249,41 @@ function handleEnemies() {
 }
 
 //resources
+
+const amounts = [20, 30, 40];
+
+class Resource {
+    constructor() {
+        this.x = Math.random() * (canvas.width - cellSize);
+        this.y = (Math.floor(Math.random() * 5) + 1) * cellSize + 25;
+        this.width = cellSize * 0.6;
+        this.height = cellSize * 0.6;
+        this.amount = amounts[Math.floor(Math.random() * amounts.length)];
+    }
+    draw() {
+        ctx.fillStyle = "yellow";
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.fillStyle = "black";
+        ctx.font = "20px Orbitron";
+        ctx.fillText(this.amount, this.x + 15, this.y +25);
+    }
+}
+
+function handleResources() {
+    if (frame % 500 === 0 && score < winningScore) {
+        resources.push(new Resource());
+        console.log(`${frame} new resource`)
+    }
+    for(let i = 0; i < resources.length; i++) {
+        resources[i].draw();
+        if(resources[i] && mouse.x && mouse.y && collision(resources[i], mouse)) {
+            numberOfResources += resources[i].amount;
+            resources.splice(i, 1);
+            i--;
+        }
+    }
+}
+
 //utilities
 
 function handleGameStatus() {
@@ -259,6 +296,13 @@ function handleGameStatus() {
         ctx.font = "90px Orbitron";
         ctx.fillText("GAME OVER!", 135, 330);
     }
+    if(score >= winningScore && enemies.length === 0) {
+        ctx.fillStyle = "black";
+        ctx.font = "60px Orbitron";
+        ctx.fillText(`LEVEL COMPLETE`, 130, 300);
+        ctx.font = "30px Orbitron";
+        ctx.fillText(`You win with ${score} points`, 134, 340);
+    }
 }
 
 function animate() {
@@ -267,6 +311,7 @@ function animate() {
     ctx.fillRect(0, 0, controlsBar.width, controlsBar.height);
     handleGameGrid();
     handleDefenders();
+    handleResources();
     handleProjectiles();
     handleEnemies();
     handleGameStatus();
@@ -284,3 +329,7 @@ function collision(first, second) {
             return true;
         }
 };
+
+window.addEventListener("resize", () => {
+    canvasPosition = canvas.getBoundingClientRect();
+});
